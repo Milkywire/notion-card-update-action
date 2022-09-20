@@ -1,0 +1,21 @@
+name: Sync PR to Slack channel
+
+on:
+  pull_request:
+  issue_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Sync PR status to slack channel
+        uses: milkywire/slack-pr-actions@v1
+        with:
+          slack-channel-id: C01PBLV0HFE
+        env:
+          SLACK_SIGNING_SECRET: ${{ secrets.SLACK_SIGNING_SECRET }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
