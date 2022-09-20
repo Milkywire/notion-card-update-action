@@ -7,7 +7,7 @@ require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.CardStatusDone = exports.CardStatusInProgress = exports.InputOnPRDefault = exports.InputPagePropertyTypeDefault = exports.InputPagePropertyDefault = exports.OnMerge = exports.OnPR = exports.PagePropertyType = exports.PageProperty = void 0;
+exports.CardStatusDone = exports.CardStatusInProgress = exports.InputPagePropertyTypeSecondary = exports.InputPagePropertySecondary = exports.InputOnPRDefault = exports.InputPagePropertyTypeDefault = exports.InputPagePropertyDefault = exports.OnMerge = exports.OnPR = exports.PagePropertyType = exports.PageProperty = void 0;
 const PageProperty = 'page_property';
 exports.PageProperty = PageProperty;
 const PagePropertyType = 'page_property_type';
@@ -22,6 +22,10 @@ const InputPagePropertyTypeDefault = 'status';
 exports.InputPagePropertyTypeDefault = InputPagePropertyTypeDefault;
 const InputOnPRDefault = 'In review';
 exports.InputOnPRDefault = InputOnPRDefault;
+const InputPagePropertySecondary = 'Task status';
+exports.InputPagePropertySecondary = InputPagePropertySecondary;
+const InputPagePropertyTypeSecondary = 'status';
+exports.InputPagePropertyTypeSecondary = InputPagePropertyTypeSecondary;
 const CardStatusInProgress = 'In review';
 exports.CardStatusInProgress = CardStatusInProgress;
 const CardStatusDone = 'Done';
@@ -85,7 +89,7 @@ async function run() {
     }
     catch (error) {
         if (error instanceof Error)
-            core.setFailed(error.message);
+            core.notice(error.message);
     }
 }
 run();
@@ -128,7 +132,6 @@ const client_1 = __nccwpck_require__(324);
 const constants_1 = __nccwpck_require__(5105);
 const utils_1 = __nccwpck_require__(918);
 const updateCard = async (pageId, key, type, value) => {
-    core.info(process.env.NOTION_KEY || '');
     // Initializing a client
     const notion = new client_1.Client({
         auth: process.env.NOTION_KEY,
@@ -140,15 +143,40 @@ const updateCard = async (pageId, key, type, value) => {
     // @ts-expect-error properties doesn't exist on type...
     if (response && response.properties) {
         // @ts-expect-error properties doesn't exist on type...
-        console.log(JSON.stringify(response.properties));
+        core.debug(JSON.stringify(response.properties));
     }
-    await notion.pages.update({
-        page_id: pageId,
-        properties: {
-            [key]: (0, utils_1.notionTypeToPropValue)(core.getInput(constants_1.PagePropertyType), value)
+    const attempts = [
+        { key, type },
+        {
+            key: constants_1.InputPagePropertyDefault,
+            type: constants_1.InputPagePropertyTypeDefault
+        },
+        {
+            key: constants_1.InputPagePropertySecondary,
+            type: constants_1.InputPagePropertyTypeSecondary
         }
-    });
-    console.log(`${key} was successfully updated to ${value} on page ${pageId}`);
+    ].filter((v, i, array) => i === array.findIndex(o => o.key === v.key && o.type === v.type));
+    for (let i = 0; i < attempts.length; i++) {
+        const attempt = attempts[i];
+        try {
+            await notion.pages.update({
+                page_id: pageId,
+                properties: {
+                    [attempt.key]: (0, utils_1.notionTypeToPropValue)(attempt.type, value)
+                }
+            });
+            core.info(`${attempt.key} was successfully updated to ${value} on page ${pageId}`);
+            break;
+        }
+        catch (error) {
+            if ((0, client_1.isNotionClientError)(error)) {
+                core.error(error.message);
+                if (i === attempts.length - 1) {
+                    core.notice('page could not be updated');
+                }
+            }
+        }
+    }
 };
 exports.updateCard = updateCard;
 
@@ -198,7 +226,7 @@ const extractNotionLinks = (body) => {
         return match[0];
     });
     if (links.length < 1) {
-        console.error('No Notion URL was found');
+        core.error('No Notion URL was found');
     }
     else if (results.length >= 1) {
         links = links.map(match => {
