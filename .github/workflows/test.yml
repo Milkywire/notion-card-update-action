@@ -21,10 +21,5 @@ jobs:
       - uses: actions/checkout@v3
       - uses: ./
         id: update-card
-        with:
-          page_property: 'Status'
-          page_property_type: 'select'
-          on_pr: 'In progress'
-          on_merge: 'Done'
         env:
           NOTION_KEY: ${{ secrets.NOTION_GITHUB_INTEGRATION_KEY }}
