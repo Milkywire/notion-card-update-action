@@ -8,6 +8,10 @@ card used to keep track of features.
 A regex match is performed over the PR body. It matches the all URLs that has notion.so format in it, and then the ID
 of the Card is extracted from the URL.
 
+## Changes
+
+This adds functionality to have backup properties
+
 ## Variables
 
 | Key        | Description                                                   |
@@ -46,7 +50,7 @@ jobs:
     name: Updates Notion Card
     steps:
       - name: Updates to Code Review
-        uses: ramykl/notion-card-update-action@main
+        uses: milkywire/notion-card-update-action@main
         with:
           page_property: 'Status'
           page_property_type: 'status'

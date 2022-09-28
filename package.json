@@ -1,6 +1,6 @@
 {
   "name": "notion-card-update-action",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "private": false,
   "description": "Typescript action to update notion cards",
   "main": "lib/main.js",
@@ -18,14 +18,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ramykl/notion-card-update-action.git"
+    "url": "git+https://github.com/milkywire/notion-card-update-action.git"
   },
   "keywords": [
     "actions",
     "node",
     "notion"
   ],
-  "author": "Ramy Loveridge",
+  "author": "Milkywire",
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.8.2",

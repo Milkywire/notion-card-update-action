@@ -17,7 +17,7 @@ const extractNotionLinks: (body: string) => string[] = (body: string) => {
   })
 
   if (links.length < 1) {
-    console.error('No Notion URL was found')
+    core.error('No Notion URL was found')
   } else if (results.length >= 1) {
     links = links.map(match => {
       return getIdFromUrl(match)

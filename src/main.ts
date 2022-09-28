@@ -27,7 +27,7 @@ async function run(): Promise<void> {
       core.warning("The action type doesn't match so there is nothing to do")
     }
   } catch (error) {
-    if (error instanceof Error) core.setFailed(error.message)
+    if (error instanceof Error) core.notice(error.message)
   }
 }
 
