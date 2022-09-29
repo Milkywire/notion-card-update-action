@@ -10,7 +10,7 @@ jobs:
     name: Updates Notion Card
     steps:
       - name: Update card status with PR progression
-        uses: milkywire/notion-card-update-action
+        uses: milkywire/notion-card-update-action@main
         id: update-card
         with:
           page_property: 'Status'
