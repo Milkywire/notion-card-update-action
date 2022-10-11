@@ -3,7 +3,12 @@ import * as core from '@actions/core'
 import {OnMerge, OnPR} from './constants'
 
 const getIdFromUrl: (page: string) => string = (page: string) => {
-  return page.slice(-32)
+  const markdownRegex = new RegExp(`p=[(\\S)]{32}`, 'g')
+  const results = [...page.matchAll(markdownRegex)]
+  const id = results.map(match => {
+    return match[0]
+  })
+  return id.length ? id[0].slice(-32) : page.slice(-32)
 }
 
 const extractNotionLinks: (body: string) => string[] = (body: string) => {

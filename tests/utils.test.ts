@@ -7,7 +7,8 @@ const links = {
   www: 'www.notion.so/7b6f2a8149574e308123367fbf1924e8',
   no: 'notion.so/7b6f2a8149574e308123367fbf1924e8',
   noWww: 'https://notion.so/7b6f2a8149574e308123367fbf1924e8',
-  httpNoWww: 'http://notion.so/7b6f2a8149574e308123367fbf1924e8'
+  httpNoWww: 'http://notion.so/7b6f2a8149574e308123367fbf1924e8',
+  side: 'https://www.notion.so/7b6f2a8149574e308123367fbf1924e8?v=529592a3c6264ee5844837058a35a617&p=a80aae2b6783476f92419972203db54a&pm=s'
 }
 
 const ids = {
@@ -17,7 +18,8 @@ const ids = {
   www: '7b6f2a8149574e308123367fbf1924e8',
   no: '7b6f2a8149574e308123367fbf1924e8',
   noWww: '7b6f2a8149574e308123367fbf1924e8',
-  httpNoWww: '7b6f2a8149574e308123367fbf1924e8'
+  httpNoWww: '7b6f2a8149574e308123367fbf1924e8',
+  side: 'a80aae2b6783476f92419972203db54a'
 }
 
 describe('extract notion links from body', () => {
@@ -38,7 +40,8 @@ describe('extract notion links from body', () => {
     [links.www, ids.www],
     [links.no, ids.no],
     [links.noWww, ids.noWww],
-    [links.httpNoWww, ids.httpNoWww]
+    [links.httpNoWww, ids.httpNoWww],
+    [links.side, ids.side]
   ])('extract link %s', (link: string, expected: string) => {
     const extractedLink = extractNotionLinks(link)
     expect(extractedLink).toHaveLength(1)

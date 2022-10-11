@@ -216,7 +216,12 @@ exports.notionTypeToPropValue = exports.valueFromEvent = exports.extractNotionLi
 const core = __importStar(__nccwpck_require__(2186));
 const constants_1 = __nccwpck_require__(5105);
 const getIdFromUrl = (page) => {
-    return page.slice(-32);
+    const markdownRegex = new RegExp(`p=[(\\S)]{32}`, 'g');
+    const results = [...page.matchAll(markdownRegex)];
+    const id = results.map(match => {
+        return match[0];
+    });
+    return id.length ? id[0].slice(-32) : page.slice(-32);
 };
 exports.getIdFromUrl = getIdFromUrl;
 const extractNotionLinks = (body) => {
