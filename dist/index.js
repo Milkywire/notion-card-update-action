@@ -69,17 +69,18 @@ const constants_1 = __nccwpck_require__(5105);
 const notion_1 = __nccwpck_require__(8605);
 const utils_1 = __nccwpck_require__(918);
 async function run() {
-    var _a, _b;
+    var _a, _b, _c;
     try {
         const payload = github.context.payload;
-        const body = (_a = payload.pull_request) === null || _a === void 0 ? void 0 : _a.body;
+        const githubUrl = (_a = github.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.html_url;
+        const body = (_b = payload.pull_request) === null || _b === void 0 ? void 0 : _b.body;
         const closed = payload.action === 'closed';
-        const merged = (_b = payload.pull_request) === null || _b === void 0 ? void 0 : _b.merged;
+        const merged = (_c = payload.pull_request) === null || _c === void 0 ? void 0 : _c.merged;
         const value = (0, utils_1.valueFromEvent)(merged, closed);
         if (value !== undefined) {
             const notionIds = (0, utils_1.extractNotionLinks)(body || '');
             const promises = notionIds.map(id => {
-                return (0, notion_1.updateCard)(id, core.getInput(constants_1.PageProperty), core.getInput(constants_1.PagePropertyType), value);
+                return (0, notion_1.updateCard)(id, core.getInput(constants_1.PageProperty), core.getInput(constants_1.PagePropertyType), value, githubUrl);
             });
             await Promise.all(promises);
         }
@@ -131,7 +132,7 @@ const core = __importStar(__nccwpck_require__(2186));
 const client_1 = __nccwpck_require__(324);
 const constants_1 = __nccwpck_require__(5105);
 const utils_1 = __nccwpck_require__(918);
-const updateCard = async (pageId, key, type, value) => {
+const updateCard = async (pageId, key, type, value, githubUrl) => {
     // Initializing a client
     const notion = new client_1.Client({
         auth: process.env.NOTION_KEY,
@@ -140,9 +141,7 @@ const updateCard = async (pageId, key, type, value) => {
     const response = await notion.pages.retrieve({
         page_id: pageId
     });
-    // @ts-expect-error properties doesn't exist on type...
-    if (response && response.properties) {
-        // @ts-expect-error properties doesn't exist on type...
+    if (response && 'properties' in response) {
         core.debug(JSON.stringify(response.properties));
     }
     const attempts = [
@@ -166,6 +165,12 @@ const updateCard = async (pageId, key, type, value) => {
                 }
             });
             core.info(`${attempt.key} was successfully updated to ${value} on page ${pageId}`);
+            if (githubUrl && value === constants_1.OnPR) {
+                await notion.pages.update({
+                    page_id: pageId,
+                    properties: { GitHubLink: { url: githubUrl, type: 'url' } }
+                });
+            }
             break;
         }
         catch (error) {

@@ -8,6 +8,7 @@ import {extractNotionLinks, valueFromEvent} from './utils'
 async function run(): Promise<void> {
   try {
     const payload = github.context.payload
+    const githubUrl = github.context.payload.pull_request?.html_url
     const body = payload.pull_request?.body
     const closed = payload.action === 'closed'
     const merged = payload.pull_request?.merged
@@ -19,7 +20,8 @@ async function run(): Promise<void> {
           id,
           core.getInput(PageProperty),
           core.getInput(PagePropertyType),
-          value
+          value,
+          githubUrl
         )
       })
       await Promise.all(promises)

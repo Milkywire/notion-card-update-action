@@ -5,7 +5,8 @@ import {
   InputPagePropertyDefault,
   InputPagePropertySecondary,
   InputPagePropertyTypeDefault,
-  InputPagePropertyTypeSecondary
+  InputPagePropertyTypeSecondary,
+  OnPR
 } from './constants'
 import {notionTypeToPropValue} from './utils'
 
@@ -13,12 +14,14 @@ const updateCard: (
   pageId: string,
   key: string,
   type: string,
-  value: string
+  value: string,
+  githubUrl?: string
 ) => void = async (
   pageId: string,
   key: string,
   type: string,
-  value: string
+  value: string,
+  githubUrl?: string
 ) => {
   // Initializing a client
   const notion = new Client({
@@ -28,9 +31,7 @@ const updateCard: (
   const response = await notion.pages.retrieve({
     page_id: pageId
   })
-  // @ts-expect-error properties doesn't exist on type...
-  if (response && response.properties) {
-    // @ts-expect-error properties doesn't exist on type...
+  if (response && 'properties' in response) {
     core.debug(JSON.stringify(response.properties))
   }
   const attempts = [
@@ -54,11 +55,17 @@ const updateCard: (
         page_id: pageId,
         properties: {
           [attempt.key]: notionTypeToPropValue(attempt.type, value)
-        } as never
-      })
+        }
+      } as Parameters<typeof notion.pages.update>[0])
       core.info(
         `${attempt.key} was successfully updated to ${value} on page ${pageId}`
       )
+      if (githubUrl && value === OnPR) {
+        await notion.pages.update({
+          page_id: pageId,
+          properties: {GitHubLink: {url: githubUrl, type: 'url'}}
+        })
+      }
       break
     } catch (error: unknown) {
       if (isNotionClientError(error)) {
