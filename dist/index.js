@@ -70,6 +70,7 @@ const notion_1 = __nccwpck_require__(8605);
 const utils_1 = __nccwpck_require__(918);
 async function run() {
     var _a, _b, _c;
+    console.log(github.context);
     try {
         const payload = github.context.payload;
         const githubUrl = (_a = github.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.html_url;
