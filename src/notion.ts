@@ -60,11 +60,13 @@ const updateCard: (
       core.info(
         `${attempt.key} was successfully updated to ${value} on page ${pageId}`
       )
+      console.log(githubUrl)
       if (githubUrl && value === OnPR) {
         await notion.pages.update({
           page_id: pageId,
           properties: {GitHubLink: {url: githubUrl, type: 'url'}}
         })
+        core.info(`${pageId} was successfully updated with ${githubUrl}`)
       }
       break
     } catch (error: unknown) {
