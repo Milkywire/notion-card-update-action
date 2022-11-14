@@ -6,7 +6,7 @@ import {updateCard} from './notion'
 import {extractNotionLinks, valueFromEvent} from './utils'
 
 async function run(): Promise<void> {
-  console.log(github.context)
+  console.log(github.context.payload)
   try {
     const payload = github.context.payload
     const githubUrl = github.context.payload.pull_request?.html_url
@@ -22,7 +22,8 @@ async function run(): Promise<void> {
           core.getInput(PageProperty),
           core.getInput(PagePropertyType),
           value,
-          githubUrl
+          githubUrl,
+          !merged && !closed
         )
       })
       await Promise.all(promises)

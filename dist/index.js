@@ -70,7 +70,7 @@ const notion_1 = __nccwpck_require__(8605);
 const utils_1 = __nccwpck_require__(918);
 async function run() {
     var _a, _b, _c;
-    console.log(github.context);
+    console.log(github.context.payload);
     try {
         const payload = github.context.payload;
         const githubUrl = (_a = github.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.html_url;
@@ -81,7 +81,7 @@ async function run() {
         if (value !== undefined) {
             const notionIds = (0, utils_1.extractNotionLinks)(body || '');
             const promises = notionIds.map(id => {
-                return (0, notion_1.updateCard)(id, core.getInput(constants_1.PageProperty), core.getInput(constants_1.PagePropertyType), value, githubUrl);
+                return (0, notion_1.updateCard)(id, core.getInput(constants_1.PageProperty), core.getInput(constants_1.PagePropertyType), value, githubUrl, !merged && !closed);
             });
             await Promise.all(promises);
         }
@@ -133,7 +133,7 @@ const core = __importStar(__nccwpck_require__(2186));
 const client_1 = __nccwpck_require__(324);
 const constants_1 = __nccwpck_require__(5105);
 const utils_1 = __nccwpck_require__(918);
-const updateCard = async (pageId, key, type, value, githubUrl) => {
+const updateCard = async (pageId, key, type, value, githubUrl, isPR) => {
     // Initializing a client
     const notion = new client_1.Client({
         auth: process.env.NOTION_KEY,
@@ -166,8 +166,8 @@ const updateCard = async (pageId, key, type, value, githubUrl) => {
                 }
             });
             core.info(`${attempt.key} was successfully updated to ${value} on page ${pageId}`);
-            console.log(githubUrl, value);
-            if (githubUrl && value === constants_1.OnPR) {
+            console.log(githubUrl, isPR);
+            if (githubUrl && isPR) {
                 await notion.pages.update({
                     page_id: pageId,
                     properties: { GitHubLink: { url: githubUrl, type: 'url' } }

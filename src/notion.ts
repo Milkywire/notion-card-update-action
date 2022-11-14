@@ -5,8 +5,7 @@ import {
   InputPagePropertyDefault,
   InputPagePropertySecondary,
   InputPagePropertyTypeDefault,
-  InputPagePropertyTypeSecondary,
-  OnPR
+  InputPagePropertyTypeSecondary
 } from './constants'
 import {notionTypeToPropValue} from './utils'
 
@@ -15,13 +14,15 @@ const updateCard: (
   key: string,
   type: string,
   value: string,
-  githubUrl?: string
+  githubUrl?: string,
+  isPR?: boolean
 ) => void = async (
   pageId: string,
   key: string,
   type: string,
   value: string,
-  githubUrl?: string
+  githubUrl?: string,
+  isPR?: boolean
 ) => {
   // Initializing a client
   const notion = new Client({
@@ -60,8 +61,8 @@ const updateCard: (
       core.info(
         `${attempt.key} was successfully updated to ${value} on page ${pageId}`
       )
-      console.log(githubUrl, value)
-      if (githubUrl && value === OnPR) {
+      console.log(githubUrl, isPR)
+      if (githubUrl && isPR) {
         await notion.pages.update({
           page_id: pageId,
           properties: {GitHubLink: {url: githubUrl, type: 'url'}}
