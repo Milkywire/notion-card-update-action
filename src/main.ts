@@ -6,7 +6,6 @@ import {updateCard} from './notion'
 import {extractNotionLinks, valueFromEvent} from './utils'
 
 async function run(): Promise<void> {
-  console.log(github.context.payload)
   try {
     const payload = github.context.payload
     const githubUrl = github.context.payload.pull_request?.html_url
