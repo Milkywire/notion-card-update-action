@@ -138,11 +138,11 @@ const updateCard = async (pageId, key, type, value, githubUrl, isPR) => {
         auth: process.env.NOTION_KEY,
         notionVersion: '2022-06-28'
     });
-    const response = await notion.pages.retrieve({
+    const page = await notion.pages.retrieve({
         page_id: pageId
     });
-    if (response && 'properties' in response) {
-        core.debug(JSON.stringify(response.properties));
+    if (page && 'properties' in page) {
+        core.debug(JSON.stringify(page.properties));
     }
     const attempts = [
         { key, type },
@@ -165,13 +165,6 @@ const updateCard = async (pageId, key, type, value, githubUrl, isPR) => {
                 }
             });
             core.info(`${attempt.key} was successfully updated to ${value} on page ${pageId}`);
-            if (githubUrl && isPR) {
-                await notion.pages.update({
-                    page_id: pageId,
-                    properties: { GitHubLink: { url: githubUrl, type: 'url' } }
-                });
-                core.info(`${pageId} was successfully updated with ${githubUrl}`);
-            }
             break;
         }
         catch (error) {
@@ -180,6 +173,79 @@ const updateCard = async (pageId, key, type, value, githubUrl, isPR) => {
                 if (i === attempts.length - 1) {
                     core.notice('page could not be updated');
                 }
+            }
+            return;
+        }
+    }
+    if (githubUrl && isPR) {
+        try {
+            const gitHubLinkPropertyId = page &&
+                'properties' in page &&
+                'GitHubLink' in page.properties &&
+                'url' in page.properties.GitHubLink
+                ? page.properties.GitHubLink.id
+                : null;
+            if (gitHubLinkPropertyId) {
+                const prop = await notion.pages.properties.retrieve({
+                    page_id: pageId,
+                    property_id: gitHubLinkPropertyId
+                });
+                if (prop.object === 'property_item' && prop.type === 'url') {
+                    if (prop.url === null) {
+                        await notion.pages.update({
+                            page_id: pageId,
+                            properties: { GitHubLink: { url: githubUrl, type: 'url' } }
+                        });
+                        core.info(`${pageId} was successfully updated with ${githubUrl}`);
+                    }
+                    else {
+                        if (prop.url !== githubUrl) {
+                            await notion.comments.create({
+                                parent: {
+                                    page_id: pageId
+                                },
+                                rich_text: [
+                                    {
+                                        text: {
+                                            content: `Another PR was created for this task: ${githubUrl}`
+                                        }
+                                    }
+                                ]
+                            });
+                        }
+                        else {
+                            core.info(`${pageId} already has a set GitHub link`);
+                        }
+                    }
+                }
+            }
+            else {
+                const databaseId = 'parent' in page && page.parent.type === 'database_id'
+                    ? page.parent.database_id
+                    : null;
+                if (databaseId) {
+                    const database = await notion.databases.retrieve({
+                        database_id: databaseId
+                    });
+                    await notion.databases.update({
+                        database_id: databaseId,
+                        properties: {
+                            ...database.properties,
+                            GitHubLink: { url: {}, type: 'url' }
+                        }
+                    });
+                    core.info(`${databaseId} was successfully updated with property "GitHubLink"`);
+                    await notion.pages.update({
+                        page_id: pageId,
+                        properties: { GitHubLink: { url: githubUrl, type: 'url' } }
+                    });
+                    core.info(`${pageId} was successfully updated with ${githubUrl}`);
+                }
+            }
+        }
+        catch (error) {
+            if ((0, client_1.isNotionClientError)(error)) {
+                core.notice(error.message);
             }
         }
     }

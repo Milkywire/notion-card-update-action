@@ -61,3 +61,5 @@ jobs:
 ```
 
 This was inspired by https://github.com/zant/notion-cards-action
+
+Notion API reference: https://developers.notion.com/reference/
