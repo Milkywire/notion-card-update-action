@@ -108,6 +108,7 @@ const updateCard: (
                   }
                 ]
               })
+              core.info('Successfully added GitHub PR comment')
             } else {
               core.info(`${pageId} already has a set GitHub link`)
             }
@@ -119,13 +120,9 @@ const updateCard: (
             ? page.parent.database_id
             : null
         if (databaseId) {
-          const database = await notion.databases.retrieve({
-            database_id: databaseId
-          })
           await notion.databases.update({
             database_id: databaseId,
             properties: {
-              ...database.properties,
               GitHubLink: {url: {}, type: 'url'}
             }
           })

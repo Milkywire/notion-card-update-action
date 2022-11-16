@@ -192,7 +192,6 @@ const updateCard = async (pageId, key, type, value, githubUrl, isPR) => {
                 });
                 if (prop.object === 'property_item' && prop.type === 'url') {
                     if (prop.url === null) {
-                        core.info('Tryin to update page with GitHubLink');
                         await notion.pages.update({
                             page_id: pageId,
                             properties: { GitHubLink: { url: githubUrl, type: 'url' } }
@@ -201,7 +200,6 @@ const updateCard = async (pageId, key, type, value, githubUrl, isPR) => {
                     }
                     else {
                         if (prop.url !== githubUrl) {
-                            core.info('Tryin to update page with comment');
                             await notion.comments.create({
                                 parent: {
                                     page_id: pageId
@@ -214,6 +212,7 @@ const updateCard = async (pageId, key, type, value, githubUrl, isPR) => {
                                     }
                                 ]
                             });
+                            core.info('Successfully added GitHub PR comment');
                         }
                         else {
                             core.info(`${pageId} already has a set GitHub link`);
@@ -226,20 +225,13 @@ const updateCard = async (pageId, key, type, value, githubUrl, isPR) => {
                     ? page.parent.database_id
                     : null;
                 if (databaseId) {
-                    core.info('Fetching database');
-                    // const database = await notion.databases.retrieve({
-                    //   database_id: databaseId
-                    // })
-                    core.info('Trying to update database with GitHubLink property');
                     await notion.databases.update({
                         database_id: databaseId,
                         properties: {
-                            // ...database.properties,
                             GitHubLink: { url: {}, type: 'url' }
                         }
                     });
                     core.info(`${databaseId} was successfully updated with property "GitHubLink"`);
-                    core.info('Tryin to update page with GitHubLink');
                     await notion.pages.update({
                         page_id: pageId,
                         properties: { GitHubLink: { url: githubUrl, type: 'url' } }
