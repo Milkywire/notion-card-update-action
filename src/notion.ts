@@ -110,7 +110,7 @@ const updateCard: (
               })
               core.info('Successfully added GitHub PR comment')
             } else {
-              core.info(`${pageId} already has a set GitHub link`)
+              core.info(`${pageId} already has this GitHub link`)
             }
           }
         }
