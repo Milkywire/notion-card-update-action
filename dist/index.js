@@ -171,7 +171,7 @@ const updateCard = async (pageId, key, type, value, githubUrl, isPR) => {
             if ((0, client_1.isNotionClientError)(error)) {
                 core.error(error.message);
                 if (i === attempts.length - 1) {
-                    core.notice('page could not be updated');
+                    core.notice(`Page ${pageId} could not be updated`);
                 }
             }
             return;
@@ -215,7 +215,7 @@ const updateCard = async (pageId, key, type, value, githubUrl, isPR) => {
                             core.info('Successfully added GitHub PR comment');
                         }
                         else {
-                            core.info(`${pageId} already has a set GitHub link`);
+                            core.info(`${pageId} already has this GitHub link`);
                         }
                     }
                 }

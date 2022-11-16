@@ -67,7 +67,7 @@ const updateCard: (
       if (isNotionClientError(error)) {
         core.error(error.message)
         if (i === attempts.length - 1) {
-          core.notice('page could not be updated')
+          core.notice(`Page ${pageId} could not be updated`)
         }
       }
       return
